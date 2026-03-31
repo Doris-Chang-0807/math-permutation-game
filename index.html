@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>可愛數學排列 - 第 1 關：創意漢堡</title>
+    <style>
+        /* 可愛風格通用 CSS */
+        :root {
+            --primary-color: #ffb6c1; /* 粉紅 */
+            --secondary-color: #ffd700; /* 亮黃 */
+            --accent-color: #87cefa; /* 粉藍 */
+            --bg-color: #fffaf0; /* 奶油白 */
+            --text-color: #5d4037; /* 深棕色，比黑色親切 */
+        }
+
+        body {
+            font-family: 'Comic Sans MS', 'Chalkboard SE', 'Microsoft JhengHei', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .game-container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: rgb(255, 255, 255);
+            padding: 30px;
+            border-radius: 25px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+        }
+
+        h1 { color: #ff69b4; font-size: 2.5rem; text-shadow: 2px 2px 0px white; }
+        .instructions { font-size: 1.2rem; background: #e0f7fa; padding: 15px; border-radius: 15px; margin-bottom: 20px;}
+
+        /* 食材庫與餐盤區 */
+        .game-area {
+            display: flex;
+            justify-content: space-around;
+            margin-top: 30px;
+            gap: 20px;
+        }
+
+        .ingredient-bank, .burger-plate {
+            width: 45%;
+            min-height: 400px;
+            border: 4px dashed var(--accent-color);
+            border-radius: 20px;
+            padding: 20px;
+            background: #fff;
+            transition: all 0.3s;
+        }
+
+        .ingredient-bank.hovered { background-color: #e3f2fd; }
+
+        .bank-title { font-size: 1.5rem; font-weight: bold; margin-bottom: 15px; color: var(--accent-color); }
+
+        /* 食材物件樣式 (可愛風) */
+        .ingredient {
+            width: 120px;
+            height: 60px;
+            margin: 10px auto;
+            border-radius: 30px; /* 圓角 */
+            cursor: grab;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 1.2rem;
+            color: white;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+            box-shadow: 0 5px 0px rgba(0,0,0,0.2); /* 厚度感陰影 */
+            transition: transform 0.1s, box-shadow 0.1s;
+            user-select: none; /* 防止文字被選取 */
+        }
+
+        .ingredient:active {
+            cursor: grabbing;
+            transform: translateY(3px);
+            box-shadow: 0 2px 0px rgba(0,0,0,0.2);
+        }
+
+        /* 食材顏色 */
+        .color-bun_top { background-color: #f4a460; border: 3px solid #cd853f; color: #5d4037; }
+        .color-beef { background-color: #8b4513; }
+        .color-cheese { background-color: #ffd700; color: #5d4037;}
+        .color-lettuce { background-color: #32cd32; }
+        .color-tomato { background-color: #ff4500; }
+        .color-bun_bottom { background-color: #f4a460; border: 3px solid #cd853f; color: #5d4037;}
+
+        /* 漢堡餐盤疊加 */
+        .burger-plate {
+            display: flex;
+            flex-direction: column-reverse; /* 讓食材從下往上疊 */
+            align-items: center;
+            justify-content: flex-start;
+            padding-bottom: 50px;
+        }
+
+        /* 教學與計數區 */
+        .math-display {
+            margin-top: 30px;
+            padding: 20px;
+            background-color: var(--secondary-color);
+            border-radius: 20px;
+            border: 5px solid white;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .counter-text { font-size: 1.4rem; font-weight: bold; margin-bottom: 10px; }
+        .factorial-formula { font-size: 2rem; color: #d32f2f; font-family: 'Courier New', monospace; }
+        .highlight { color: #ff6f61; font-weight: bold; }
+
+    </style>
+</head>
+<body>
+
+<div class="game-container">
+    <h1>🍔 創意漢堡店 🍟</h1>
+    
+    <div class="instructions">
+        你是天才廚師！這裡有 <span class="highlight">6</span> 種可愛食材。<br>
+        請從左邊**拖曳**食材到右邊的餐盤，親手疊出你最愛的創意漢堡！<br>
+        看看你每放一個食材，剩下的選擇會發生什麼變化？
+    </div>
+
+    <div class="game-area">
+        <div class="ingredient-bank" id="bank">
+            <div class="bank-title">食材庫 (剩餘 <span id="bank-count">6</span>)</div>
+            <div class="ingredient color-bun_top" draggable="true" id="ing-bun_top">上層麵包</div>
+            <div class="ingredient color-beef" draggable="true" id="ing-beef">厚切牛肉</div>
+            <div class="ingredient color-cheese" draggable="true" id="ing-cheese">起司片</div>
+            <div class="ingredient color-lettuce" draggable="true" id="ing-lettuce">爽脆生菜</div>
+            <div class="ingredient color-tomato" draggable="true" id="ing-tomato">番茄片</div>
+            <div class="ingredient color-bun_bottom" draggable="true" id="ing-bun_bottom">下層麵包</div>
+        </div>
+
+        <div class="burger-plate" id="plate">
+            <div class="bank-title">你的創意漢堡</div>
+            </div>
+    </div>
+
+    <div class="math-display">
+        <div class="counter-text">你剛剛在每一層的選擇數量是：</div>
+        <div class="factorial-formula" id="formula">
+            <span id="f-6">6</span>
+        </div>
+        <div class="counter-text" style="margin-top:15px; font-size:1.1rem">
+            如果你把所有食材排完，總共有 <span class="highlight" id="total-perm">...</span> 種排法！這就是 <span class="highlight">6的階層 (6!)</span>。
+        </div>
+    </div>
+</div>
+
+<script>
+    // 遊戲狀態
+    const totalIngredients = 6;
+    let currentInPlate = 0;
+    let choicesMade = [];
+
+    // 取得 DOM 元素
+    const bank = document.getElementById('bank');
+    const plate = document.getElementById('plate');
+    const bankCountSpan = document.getElementById('bank-count');
+    const formulaSpan = document.getElementById('formula');
+    const totalPermSpan = document.getElementById('total-perm');
+    const ingredients = document.querySelectorAll('.ingredient');
+
+    // 1. 初始化拖曳事件
+    ingredients.forEach(ing => {
+        ing.addEventListener('dragstart', dragStart);
+        ing.addEventListener('dragend', dragEnd);
+    });
+
+    // 2. 初始化餐盤的接收事件
+    plate.addEventListener('dragover', dragOver);
+    plate.addEventListener('dragenter', dragEnter);
+    plate.addEventListener('dragleave', dragLeave);
+    plate.addEventListener('drop', dropOnPlate);
+
+    // --- 拖曳邏輯函數 ---
+
+    function dragStart(e) {
+        e.dataTransfer.setData('text/plain', e.target.id);
+        e.target.style.opacity = '0.5';
+    }
+
+    function dragEnd(e) {
+        e.target.style.opacity = '1';
+    }
+
+    function dragOver(e) {
+        e.preventDefault(); // 必須阻止預防行為才能接收掉落
+    }
+
+    function dragEnter(e) {
+        e.preventDefault();
+        plate.style.borderColor = '#ff69b4'; // 變色提示
+        plate.style.background = '#fce4ec';
+    }
+
+    function dragLeave(e) {
+        plate.style.borderColor = '#87cefa'; // 還原
+        plate.style.background = '#fff';
+    }
+
+    function dropOnPlate(e) {
+        e.preventDefault();
+        dragLeave(e); // 恢復樣式
+
+        const id = e.dataTransfer.getData('text/plain');
+        const draggableElement = document.getElementById(id);
+
+        // 如果該物件原本不在餐盤裡，且來自食材庫
+        if (draggableElement && draggableElement.parentNode === bank) {
+            
+            // 邏輯處理
+            choicesMade.push(totalIngredients - currentInPlate);
+            currentInPlate++;
+            
+            // UI 更新：將物件移動到餐盤
+            plate.appendChild(draggableElement);
+            draggableElement.draggable = false; // 放到餐盤後不可再拖曳
+            draggableElement.style.cursor = 'default';
+
+            updateMathDisplay();
+        }
+    }
+
+    // --- 數學計算與視覺化更新 ---
+
+    function factorial(n) {
+        if (n === 0 || n === 1) return 1;
+        return n * factorial(n - 1);
+    }
+
+    function updateMathDisplay() {
+        // 更新剩餘數量
+        const remainingInBank = totalIngredients - currentInPlate;
+        bankCountSpan.innerText = remainingInBank;
+
+        // 更新階層公式顯示 (6 x 5 x 4...)
+        let formulaHtml = choicesMade.join(' <span style="color:#aaa">×</span> ');
+        
+        if (remainingInBank > 0) {
+            formulaHtml += ` <span style="color:#aaa">× ...</span>`;
+        } else {
+            // 全部排完
+            formulaHtml += ` = <span style="color:#d32f2f">${factorial(totalIngredients)}</span>`;
+        }
+        
+        formulaSpan.innerHTML = formulaHtml;
+
+        // 顯示總數 (只有排完時顯示)
+        if(currentInBank === 0) {
+            totalPermSpan.innerText = factorial(totalIngredients);
+        } else {
+             totalPermSpan.innerText = "...";
+        }
+    }
+
+    // 初始化顯示
+    totalPermSpan.innerText = factorial(totalIngredients);
+
+</script>
+
+</body>
+</html>
