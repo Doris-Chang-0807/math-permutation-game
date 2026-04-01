@@ -2,221 +2,190 @@
 <html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>可愛數學排列大冒險 - 最終完備版</title>
+    <title>可愛數學排列大冒險 - 邏輯思考版</title>
     <style>
-        :root {
-            --primary: #ffb6c1; --secondary: #ffd700; --accent: #87cefa;
-            --bg: #fffaf0; --text: #5d4037; --success: #4caf50;
-        }
-
-        body {
-            font-family: 'Comic Sans MS', 'Chalkboard SE', 'Microsoft JhengHei', sans-serif;
-            background-color: var(--bg); color: var(--text); margin: 0; padding: 10px;
-        }
-
-        .game-container {
-            max-width: 900px; margin: 20px auto; background: white; padding: 30px;
-            border-radius: 30px; box-shadow: 0 10px 30px rgba(0,0,0,0.1);
-            position: relative; min-height: 700px;
-        }
-
-        .level { display: none; }
-        .level.active { display: block; animation: fadeIn 0.5s; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; } }
-
+        :root { --primary: #ffb6c1; --secondary: #ffd700; --accent: #87cefa; --bg: #fffaf0; --text: #5d4037; --success: #4caf50; }
+        body { font-family: 'Comic Sans MS', 'Chalkboard SE', 'Microsoft JhengHei', sans-serif; background: var(--bg); color: var(--text); padding: 10px; margin: 0; }
+        .game-container { max-width: 950px; margin: 20px auto; background: white; padding: 25px; border-radius: 30px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); }
+        .level { display: none; } .level.active { display: block; animation: fadeIn 0.4s; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
         h1 { color: #ff69b4; text-align: center; }
-        .progress-bar { text-align: center; font-weight: bold; color: var(--accent); margin-bottom: 15px; }
-
         .instructions { background: #fff9c4; padding: 15px; border-radius: 15px; margin-bottom: 20px; border: 2px dashed #fbc02d; line-height: 1.5; }
-
-        .game-area { display: flex; justify-content: space-around; gap: 15px; margin-bottom: 20px; }
+        
+        .game-area { display: flex; justify-content: space-around; gap: 20px; margin-bottom: 20px; }
         .bank, .drop-zone { 
-            width: 45%; min-height: 500px; border: 4px dashed var(--accent); 
-            border-radius: 20px; padding: 15px; background: #fff;
-            display: flex; flex-direction: column; align-items: center;
+            width: 45%; min-height: 480px; border: 4px dashed var(--accent); border-radius: 20px; 
+            padding: 15px; background: #fff; display: flex; flex-wrap: wrap; align-content: flex-start; justify-content: center;
         }
-        .drop-zone { flex-direction: column-reverse; }
+        .drop-zone { flex-direction: column-reverse; flex-wrap: nowrap; align-items: center; }
 
+        /* 物件樣式 */
         .item {
-            width: 140px; height: 38px; margin: 3px; border-radius: 20px; 
-            cursor: grab; display: flex; align-items: center; justify-content: center; 
-            font-weight: bold; color: white; text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
-            box-shadow: 0 4px 0px rgba(0,0,0,0.2); transition: 0.2s; font-size: 0.85rem;
+            width: 150px; height: 42px; margin: 5px; border-radius: 20px; cursor: grab;
+            display: flex; align-items: center; justify-content: center; font-weight: bold; color: white;
+            box-shadow: 0 4px 0 rgba(0,0,0,0.2); transition: transform 0.2s; font-size: 0.9rem;
         }
-        .fixed { cursor: not-allowed; opacity: 0.6; border: 2px solid #555; box-shadow: none; }
+        .fixed { cursor: not-allowed; opacity: 0.6; box-shadow: none; border: 2px solid #999; }
+        
+        /* 顏色區分 */
+        .c-burger { background: #f4a460; } .c-meat { background: #8b4513; } .c-veg { background: #32cd32; }
+        .c-ghost { background: #9575cd; } .c-boy { background: #42a5f5; } .c-girl { background: #ec407a; }
 
-        /* 顏色視覺 */
-        .color-1 { background: #f4a460; color: #5d4037; border: 2px solid #cd853f; } /* 麵包 */
-        .color-2 { background: #8b4513; } /* 肉 */
-        .color-3 { background: #32cd32; } /* 菜 */
-        .color-4 { background: #ffd700; color: #5d4037; } /* 起司 */
-        .color-5 { background: #ff4500; } /* 番茄 */
-        .color-6 { background: #ff69b4; } /* 培根 */
-        .color-7 { background: #9575cd; } /* 隊員/紫色 */
-        .color-8 { background: #42a5f5; } /* 男生/藍色 */
-        .color-9 { background: #ec407a; } /* 女生/粉色 */
-
+        /* 答案選擇區 */
         .quiz-section { background: #e1f5fe; padding: 20px; border-radius: 20px; text-align: center; border: 3px solid var(--accent); }
-        input { padding: 10px; width: 100px; border-radius: 10px; border: 2px solid var(--accent); text-align: center; font-size: 1.2rem; }
-        .btn { padding: 10px 20px; border-radius: 50px; border: none; cursor: pointer; font-weight: bold; margin: 5px; }
+        select { padding: 8px 15px; font-size: 1.2rem; border-radius: 10px; border: 2px solid var(--accent); margin: 0 5px; cursor: pointer; }
+        .btn { padding: 12px 25px; border-radius: 50px; border: none; cursor: pointer; font-weight: bold; margin-top: 15px; }
         .btn-check { background: var(--secondary); color: var(--text); }
         .btn-next { background: var(--success); color: white; display: none; }
-        .hidden { display: none; }
+        
+        /* 視覺提示：格位 */
+        .slot-hint { width: 150px; height: 42px; border: 2px dotted #ccc; border-radius: 20px; margin: 5px; }
     </style>
 </head>
 <body>
 
 <div class="game-container">
-    <div class="progress-bar" id="progress">LEVEL 1 / 5</div>
+    <div id="progress" style="text-align:right; font-weight:bold; color:var(--accent);">LEVEL 1 / 5</div>
 
     <div id="level1" class="level active">
         <h1>🍔 第一關：豪華七層漢堡</h1>
-        <div class="instructions">補上下層麵包了！現在有 <b>7</b> 種相異食材。<br>請全數排上餐盤，並算出總共有幾種排法？ (算式：7!)</div>
+        <div class="instructions">請將 <b>7</b> 個食材全部排好！排列順序不同，漢堡就不同。<br>算算看，這 7 個東西全排列的邏輯是什麼？</div>
         <div class="game-area">
             <div class="bank" id="bank1">
-                <div class="item color-1" draggable="true" id="l1-1">上層麵包</div>
-                <div class="item color-6" draggable="true" id="l1-6">香煎培根</div>
-                <div class="item color-2" draggable="true" id="l1-2">厚切牛肉</div>
-                <div class="item color-4" draggable="true" id="l1-4">切達起司</div>
-                <div class="item color-3" draggable="true" id="l1-3">爽脆生菜</div>
-                <div class="item color-5" draggable="true" id="l1-5">多汁番茄</div>
-                <div class="item color-1" draggable="true" id="l1-7">下層麵包</div>
+                <div class="item c-burger" draggable="true" id="l1-i1">上層麵包</div>
+                <div class="item c-meat" draggable="true" id="l1-i2">厚切牛肉</div>
+                <div class="item c-veg" draggable="true" id="l1-i3">鮮脆生菜</div>
+                <div class="item c-meat" draggable="true" id="l1-i4">切達起司</div>
+                <div class="item c-meat" draggable="true" id="l1-i5">多汁番茄</div>
+                <div class="item c-meat" draggable="true" id="l1-i6">香煎培根</div>
+                <div class="item c-burger" draggable="true" id="l1-i7">下層麵包</div>
             </div>
             <div class="drop-zone" id="zone1"></div>
         </div>
         <div class="quiz-section">
-            <p>🤔 7! 等於多少種排法？ (7×6×5×4×3×2×1)</p>
-            <input type="number" id="ans1"> <button class="btn btn-check" onclick="check(1, 5040)">檢查</button>
-            <button id="next1" class="btn btn-next" onclick="go(2)">過關！前進下一關 ➔</button>
+            <span>這組漢堡總共有幾種排法？ ➔ </span>
+            <select id="ans1"><option value="">?</option><option value="5">5!</option><option value="6">6!</option><option value="7">7!</option></select>
+            <br><button class="btn btn-check" onclick="check(1, '7')">檢查邏輯</button>
+            <button id="next1" class="btn btn-next" onclick="go(2)">答對了！去下一關 ➔</button>
         </div>
     </div>
 
     <div id="level2" class="level">
         <h1>🍞 第二關：主廚的堅持</h1>
-        <div class="instructions">上下麵包鎖定在頭尾！請排列中間的 <b>4</b> 種料。<br>算算看中間的排列數是多少？ (提示：4!)</div>
+        <div class="instructions">上下麵包已經固定了（不可移動）。請排列中間的 <b>4</b> 種料！</div>
         <div class="game-area">
             <div class="bank" id="bank2">
-                <div class="item color-2" draggable="true" id="l2-1">厚切牛肉</div>
-                <div class="item color-3" draggable="true" id="l2-2">爽脆生菜</div>
-                <div class="item color-4" draggable="true" id="l2-3">切達起司</div>
-                <div class="item color-5" draggable="true" id="l2-4">多汁番茄</div>
+                <div class="item c-meat" draggable="true" id="l2-i1">牛肉</div><div class="item c-veg" draggable="true" id="l2-i2">生菜</div>
+                <div class="item c-meat" draggable="true" id="l2-i3">起司</div><div class="item c-meat" draggable="true" id="l2-i4">培根</div>
             </div>
             <div class="drop-zone" id="zone2">
-                <div class="item color-1 fixed">下層麵包 (固定)</div>
-                <div id="sub-zone2" style="width:100%; min-height:200px; display:flex; flex-direction:column-reverse; align-items:center;"></div>
-                <div class="item color-1 fixed">上層麵包 (固定)</div>
+                <div class="item c-burger fixed">下層麵包</div>
+                <div id="sub2" style="min-height:200px; display:flex; flex-direction:column-reverse; align-items:center;"></div>
+                <div class="item c-burger fixed">上層麵包</div>
             </div>
         </div>
         <div class="quiz-section">
-            <p>🤔 4! 等於多少？</p>
-            <input type="number" id="ans2"> <button class="btn btn-check" onclick="check(2, 24)">檢查</button>
-            <button id="next2" class="btn btn-next" onclick="go(3)">過關！前進下一關 ➔</button>
+            <span>中間這幾層的排列數是？ ➔ </span>
+            <select id="ans2"><option value="">?</option><option value="2">2!</option><option value="4">4!</option><option value="6">6!</option></select>
+            <br><button class="btn btn-check" onclick="check(2, '4')">檢查邏輯</button>
+            <button id="next2" class="btn btn-next" onclick="go(3)">太棒了！ ➔</button>
         </div>
     </div>
 
     <div id="level3" class="level">
         <h1>👻 第三關：五人鬼屋探險</h1>
-        <div class="instructions">5 人排隊：<b>大膽王</b>必站第1位，<b>膽小鬼</b>必站中間(第3位)！<br>排列剩下的 <b>3</b> 位隊員，總共有幾種可能？</div>
+        <div class="instructions">5人中，<b>大膽王</b>(第1)與<b>膽小鬼</b>(中間第3)已站好。請排剩下的 <b>3</b> 人！</div>
         <div class="game-area">
             <div class="bank" id="bank3">
-                <div class="item color-7" draggable="true" id="l3-1">隊員 A</div>
-                <div class="item color-7" draggable="true" id="l3-2">隊員 B</div>
-                <div class="item color-7" draggable="true" id="l3-3">隊員 C</div>
+                <div class="item c-ghost" draggable="true" id="l3-i1">隊員 A</div><div class="item c-ghost" draggable="true" id="l3-i2">隊員 B</div><div class="item c-ghost" draggable="true" id="l3-i3">隊員 C</div>
             </div>
             <div class="drop-zone" id="zone3">
-                <div class="item color-7 fixed">隊員 E (最後)</div>
-                <div class="item color-7 fixed">隊員 D (第4位)</div>
-                <div class="item color-4 fixed">膽小鬼 (中間)</div>
-                <div id="sub-zone3" style="width:100%; min-height:100px; display:flex; flex-direction:column-reverse; align-items:center;"></div>
-                <div class="item color-2 fixed">大膽王 (最前)</div>
+                <div class="item c-ghost fixed">隊員 E (末位)</div>
+                <div class="item c-ghost fixed">隊員 D (第4位)</div>
+                <div class="item c-girl fixed">膽小鬼 (中間)</div>
+                <div id="sub3" style="min-height:100px; display:flex; flex-direction:column-reverse; align-items:center;"></div>
+                <div class="item c-boy fixed">大膽王 (首位)</div>
             </div>
         </div>
         <div class="quiz-section">
-            <p>🤔 剩下的 3 人排列數 (3!) 是多少？</p>
-            <input type="number" id="ans3"> <button class="btn btn-check" onclick="check(3, 6)">檢查</button>
-            <button id="next3" class="btn btn-next" onclick="go(4)">過關！前進下一關 ➔</button>
+            <span>剩下的排列邏輯是？ ➔ </span>
+            <select id="ans3"><option value="">?</option><option value="3">3!</option><option value="5">5!</option></select>
+            <br><button class="btn btn-check" onclick="check(3, '3')">檢查邏輯</button>
+            <button id="next3" class="btn btn-next" onclick="go(4)">正確！ ➔</button>
         </div>
     </div>
 
     <div id="level4" class="level">
         <h1>🧗 第四關：懸崖疊羅漢</h1>
-        <div class="instructions"><b>2 女在最上，3 男在最下</b>。<br>這是一個分組排列：(女生排法) × (男生排法) = 2! × 3!</div>
+        <div class="instructions">2女在最上，3男在最下。分別排列女生與男生的位置吧！</div>
         <div class="game-area">
             <div class="bank" id="bank4">
-                <div class="item color-9" draggable="true" id="l4-1">女生 A</div>
-                <div class="item color-9" draggable="true" id="l4-2">女生 B</div>
-                <div class="item color-8" draggable="true" id="l4-3">男生 A</div>
-                <div class="item color-8" draggable="true" id="l4-4">男生 B</div>
-                <div class="item color-8" draggable="true" id="l4-5">男生 C</div>
+                <div class="item c-girl" draggable="true" id="l4-i1">女A</div><div class="item c-girl" draggable="true" id="l4-i2">女B</div>
+                <div class="item c-boy" draggable="true" id="l4-i3">男A</div><div class="item c-boy" draggable="true" id="l4-i4">男B</div><div class="item c-boy" draggable="true" id="l4-i5">男C</div>
             </div>
             <div class="drop-zone" id="zone4"></div>
         </div>
         <div class="quiz-section">
-            <p>🤔 2! × 3! = 2 × 6 = ?</p>
-            <input type="number" id="ans4"> <button class="btn btn-check" onclick="check(4, 12)">檢查</button>
-            <button id="next4" class="btn btn-next" onclick="go(5)">過關！最後一關 ➔</button>
+            <p>🤔 這題的排列算式是？</p>
+            ( <select id="ans4-1"><option value="">?</option><option value="2">2!</option><option value="3">3!</option></select> )
+            <select id="ans4-op"><option value="">?</option><option value="x">×</option><option value="+">+</option></select>
+            ( <select id="ans4-2"><option value="">?</option><option value="2">2!</option><option value="3">3!</option></select> )
+            <br><button class="btn btn-check" onclick="check4()">檢查複合邏輯</button>
+            <button id="next4" class="btn btn-next" onclick="go(5)">大師級表現！ ➔</button>
         </div>
     </div>
 
     <div id="level5" class="level">
         <h1>🏆 第五關：榮耀頒獎</h1>
-        <div class="instructions">5 位勇者領獎，第一名已經固定在中間領獎台了！</div>
+        <div class="instructions">5人領獎，第一名已固定。剩下 4 人怎麼排？</div>
         <div class="quiz-section">
-            <p>🤔 剩下 4 位勇者的隨意排列數 (4!) 是多少？</p>
-            <input type="number" id="ans5"> <button class="btn btn-check" onclick="check(5, 24)">檢查</button>
-            <div id="final-msg" class="hidden">
-                <h2 style="color:var(--success)">🎉 數學英雄！恭喜通關 🎉</h2>
-                <p>你已經完美掌握了所有的排列邏輯！</p>
-                <button class="btn btn-check" onclick="location.reload()">重新挑戰</button>
+            <select id="ans5"><option value="">?</option><option value="4">4!</option><option value="5">5!</option></select>
+            <button class="btn btn-check" onclick="check(5, '4')">完成挑戰</button>
+            <div id="final" style="display:none; color:var(--success); margin-top:20px;">
+                <h2>🎊 恭喜！你掌握了排列的奧秘 🎊</h2>
+                <button class="btn btn-check" onclick="location.reload()">再玩一次</button>
             </div>
         </div>
     </div>
 </div>
 
 <script>
-    // 拖曳邏輯區
-    const zones = ['zone1', 'sub-zone2', 'sub-zone3', 'zone4'];
-    
-    document.querySelectorAll('.item[draggable="true"]').forEach(item => {
-        item.addEventListener('dragstart', (e) => e.dataTransfer.setData('text', e.target.id));
+    // 強化拖曳邏輯：允許自由移動
+    document.addEventListener('dragstart', e => { if(e.target.classList.contains('item')) e.dataTransfer.setData('text', e.target.id); });
+    document.addEventListener('dragover', e => e.preventDefault());
+    document.addEventListener('drop', e => {
+        e.preventDefault();
+        const id = e.dataTransfer.getData('text');
+        const el = document.getElementById(id);
+        if(!el) return;
+        const target = e.target.closest('.drop-zone, .bank, #sub2, #sub3');
+        if(target) target.appendChild(el);
     });
 
-    zones.forEach(zId => {
-        const zone = document.getElementById(zId);
-        if(!zone) return;
-        zone.addEventListener('dragover', (e) => e.preventDefault());
-        zone.addEventListener('drop', (e) => {
-            e.preventDefault();
-            const id = e.dataTransfer.getData('text');
-            const el = document.getElementById(id);
-            if (el) zone.appendChild(el);
-        });
-    });
-
-    // 邏輯判斷區
     function check(lv, correct) {
-        const val = document.getElementById('ans' + lv).value;
-        const btnNext = document.getElementById('next' + lv);
-        if (parseInt(val) === correct) {
-            alert("太棒了！你的大腦運算無誤 ✨");
-            if(lv === 5) {
-                document.getElementById('final-msg').classList.remove('hidden');
-            } else {
-                btnNext.style.display = 'inline-block';
-            }
-        } else {
-            alert("哎呀，數字不太對喔，再算一次看看！");
-        }
+        if(document.getElementById('ans'+lv).value === correct) {
+            alert("邏輯完全正確！✨");
+            document.getElementById('next'+lv).style.display = 'inline-block';
+            if(lv===5) document.getElementById('final').style.display = 'block';
+        } else { alert("再想想看物件的數量喔！"); }
+    }
+
+    function check4() {
+        const v1 = document.getElementById('ans4-1').value;
+        const op = document.getElementById('ans4-op').value;
+        const v2 = document.getElementById('ans4-2').value;
+        // 允許 2!x3! 或 3!x2!
+        if(op === 'x' && ((v1==='2' && v2==='3') || (v1==='3' && v2==='2'))) {
+            alert("太強了！女生與男生的排列相乘，正確！");
+            document.getElementById('next4').style.display = 'inline-block';
+        } else { alert("想想看，女生有幾人？男生有幾人？他們之間是什麼關係？"); }
     }
 
     function go(lv) {
         document.querySelectorAll('.level').forEach(l => l.classList.remove('active'));
-        document.getElementById('level' + lv).classList.add('active');
+        document.getElementById('level'+lv).classList.add('active');
         document.getElementById('progress').innerText = `LEVEL ${lv} / 5`;
-        window.scrollTo(0,0);
     }
 </script>
-
 </body>
 </html>
