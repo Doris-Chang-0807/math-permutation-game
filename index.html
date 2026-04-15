@@ -5,241 +5,240 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CRAZY WCDONALD - 排列單元教學</title>
     <style>
-        :root { --primary: #e61e2a; --secondary: #ffbc0d; --bg: #f8f9fa; }
-        body { font-family: "Arial", sans-serif; background-color: var(--bg); margin: 0; overflow: hidden; }
+        /* 基礎樣式設定 [cite: 9-11] */
+        :root { --primary: #e61e2a; --secondary: #ffbc0d; --bg: #ffffff; }
+        body { font-family: "Microsoft JhengHei", Arial, sans-serif; background-color: var(--bg); margin: 0; overflow-x: hidden; text-align: center; }
         
         /* 頁面切換機制 */
-        .page { display: none; height: 100vh; width: 100vw; position: relative; flex-direction: column; align-items: center; justify-content: center; }
-        .active { display: flex; }
+        .page { display: none; min-height: 100vh; width: 100vw; position: relative; flex-direction: column; align-items: center; justify-content: center; padding: 20px; box-sizing: border-box; }
+        .active { display: flex !important; }
 
-        /* 左上角計時器 */
-        #timer-display { position: absolute; top: 20px; left: 20px; font-size: 24px; font-weight: bold; color: var(--primary); z-index: 100; background: white; padding: 10px; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
+        /* 計時器樣式  */
+        #timer-display { position: fixed; top: 20px; left: 20px; font-size: 24px; font-weight: bold; color: var(--primary); z-index: 1000; background: rgba(255,255,255,0.9); padding: 10px 20px; border-radius: 50px; border: 3px solid var(--secondary); display: none; }
 
-        /* 食材與盤子樣式 */
-        .ingredient { width: 120px; height: 30px; margin: 5px; cursor: grab; text-align: center; line-height: 30px; border-radius: 15px; font-weight: bold; color: white; transition: transform 0.2s; }
-        .bun-top { background: #d2691e; border-radius: 50px 50px 10px 10px; height: 40px; }
-        .bun-bottom { background: #d2691e; border-radius: 10px 10px 50px 50px; }
-        .patty { background: #8b4513; height: 25px; }
+        /* 封面裝飾 [cite: 10-11] */
+        .chef-emoji { font-size: 100px; margin: 20px; animation: float 3s ease-in-out infinite; }
+        .food-bg { font-size: 40px; margin: 10px; }
+
+        /* 食材與盤子 [cite: 14, 17] */
+        .ingredient-container { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; margin: 20px 0; min-height: 60px; width: 80%; border: 2px dashed #ccc; padding: 10px; border-radius: 10px; }
+        .ingredient { padding: 10px 20px; cursor: grab; border-radius: 20px; font-weight: bold; color: white; user-select: none; box-shadow: 0 4px 0 rgba(0,0,0,0.2); }
+        .bun-top { background: #d2691e; }
+        .bun-bottom { background: #d2691e; }
+        .patty { background: #8b4513; }
         .lettuce { background: #32cd32; }
         .cheese { background: #ffd700; color: #333; }
         .tomato { background: #ff6347; }
         .bacon { background: #b22222; }
 
-        .plate { width: 300px; min-height: 200px; border-bottom: 10px solid #ccc; margin-top: 50px; display: flex; flex-direction: column-reverse; align-items: center; padding-bottom: 10px; }
+        .plate { width: 320px; min-height: 250px; border-bottom: 15px solid #888; margin: 30px 0; display: flex; flex-direction: column-reverse; align-items: center; padding-bottom: 5px; background: rgba(0,0,0,0.03); border-radius: 0 0 20px 20px; }
 
-        /* 按鈕樣式 */
-        button { background: var(--secondary); border: none; padding: 15px 30px; font-size: 18px; border-radius: 30px; cursor: pointer; font-weight: bold; transition: 0.3s; margin-top: 20px; }
-        button:hover { transform: scale(1.1); background: #f0ad00; }
+        /* 按鈕與互動 [cite: 12, 17] */
+        button { background: var(--secondary); border: none; padding: 15px 45px; font-size: 22px; border-radius: 50px; cursor: pointer; font-weight: bold; box-shadow: 0 6px 0 #d49b00; transition: 0.1s; margin: 10px; }
+        button:hover { background: #f0ad00; transform: translateY(2px); box-shadow: 0 4px 0 #d49b00; }
+        button:active { transform: translateY(6px); box-shadow: none; }
 
-        /* 動畫效果 */
-        @keyframes float { 0% { transform: translateY(0px); } 50% { transform: translateY(-10px); } 100% { transform: translateY(0px); } }
-        .floating { animation: float 3s ease-in-out infinite; }
-        
-        .money-rain { position: absolute; top: -50px; font-size: 24px; animation: fall 3s linear infinite; }
-        @keyframes fall { to { transform: translateY(110vh); } }
+        @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-20px); } }
+        .money-rain { position: fixed; top: -50px; font-size: 30px; animation: fall 3s linear forwards; z-index: 999; }
+        @keyframes fall { to { transform: translateY(110vh) rotate(360deg); } }
     </style>
 </head>
 <body>
 
-    <div id="timer-display" style="display:none;">剩餘時間: <span id="time-left">07:00</span></div>
+    <div id="timer-display">⏳ 剩餘時間: <span id="time-left">07:00</span></div>
 
     <div id="page0" class="page active">
-        <h1 style="color: var(--primary); font-size: 60px; margin-bottom: 10px;">CRAZY WCDONALD</h1>
-        <p>歡迎來到瘋狂麥當勞！準備好迎接排列挑戰了嗎？</p>
-        <img src="https://img.icons8.com/color/160/chef.png" class="floating" alt="Chef">
-        <button onclick="nextPage(1)">開始遊戲</button>
+        <div class="food-bg">🥬 🧀 🍅 🥩 🥓</div>
+        <h1 style="color: var(--primary); font-size: clamp(40px, 8vw, 70px); margin: 10px 0;">CRAZY WCDONALD</h1>
+        <p style="font-size: 20px; color: #555;">歡迎來到瘋狂麥當勞！準備好迎接排列挑戰了嗎？</p>
+        <div class="chef-emoji">👨‍🍳</div>
+        <button onclick="goToPage(1)">開始遊戲</button>
+        <p style="margin-top: 20px; font-size: 14px; color: #999;">背景：精緻廚房餐廳 🍳</p>
     </div>
 
     <div id="page1" class="page">
-        <h2>第一關：見習廚師 (暖身練習)</h2>
-        <p>客人點餐：生菜、牛肉、上層麵包、下層麵包</p>
-        <div id="source-ingredients" style="display:flex;">
+        <h2>🔰 第一關：見習廚師 (暖身)</h2>
+        <p>客人點餐：生菜、牛肉、上層麵包、下層麵包 (隨機排列)</p>
+        <div class="ingredient-container" id="source-1" ondrop="drop(event)" ondragover="allowDrop(event)">
             <div class="ingredient lettuce" draggable="true" ondragstart="drag(event)" id="let1">生菜</div>
             <div class="ingredient patty" draggable="true" ondragstart="drag(event)" id="pat1">牛肉</div>
             <div class="ingredient bun-top" draggable="true" ondragstart="drag(event)" id="bt1">上層麵包</div>
             <div class="ingredient bun-bottom" draggable="true" ondragstart="drag(event)" id="bb1">下層麵包</div>
         </div>
         <div class="plate" ondrop="drop(event)" ondragover="allowDrop(event)" id="plate1"></div>
-        <p id="hint">☝️ 提示：拖曳食材到盤子裡完成漢堡！</p>
-        <button id="next-btn-1" style="display:none;" onclick="startOfficialGame()">下一個訂單</button>
+        <p id="hint">☝️ 提示：將所有食材拖到盤子上即可完成！</p>
+        <button id="next-btn-1" style="display:none;" onclick="startTimerAndGame()">下一個訂單</button>
     </div>
 
     <div id="game-page" class="page">
         <h2 id="level-title">正式廚師</h2>
-        <div id="order-box" style="background: white; padding: 15px; border-left: 5px solid var(--primary); margin: 10px;">
-            <strong>📋 今日訂單：</strong> <span id="order-desc"></span>
+        <div style="background: #fff3f3; padding: 15px; border-radius: 10px; border: 2px solid var(--primary); max-width: 500px;">
+            <strong style="color: var(--primary);">📋 訂單要求：</strong><br>
+            <span id="order-desc" style="font-size: 18px;"></span>
         </div>
-        <div id="money-counter">累積工資: $<span id="total-money">0</span></div>
-        <div id="game-ingredients" style="display:flex; margin: 20px;"></div>
-        <div class="plate" ondrop="drop(event)" ondragover="allowDrop(event)" id="main-plate"></div>
+        <div style="margin: 15px; font-size: 20px;">💰 目前累計金額：<span id="total-money" style="color: #28a745; font-weight: bold;">0</span></div>
         
-        <div id="math-question" style="display:none; text-align: center; margin-top: 20px; background: #eee; padding: 15px; border-radius: 10px;">
-            <p id="question-text">客人提問：這些食材可以製作出幾種漢堡？</p>
-            <div id="options"></div>
+        <div class="ingredient-container" id="game-source" ondrop="drop(event)" ondragover="allowDrop(event)"></div>
+        <div class="plate" id="main-plate" ondrop="drop(event)" ondragover="allowDrop(event)"></div>
+        
+        <div id="math-question" style="display:none; margin-top: 20px; background: #fffbe6; padding: 20px; border-radius: 15px; border: 2px solid var(--secondary); width: 90%; max-width: 400px;">
+            <p id="question-text" style="font-weight: bold;"></p>
+            <div id="options" style="display: flex; flex-wrap: wrap; justify-content: center; gap: 10px;"></div>
         </div>
         
-        <button id="serve-btn" onclick="checkOrder()">出餐！</button>
+        <button id="serve-btn" onclick="showQuestion()">製作完成，出餐！</button>
     </div>
 
     <div id="page9" class="page">
-        <h1 style="color: var(--secondary);">💰 薪資結算 💰</h1>
-        <div id="final-amount" style="font-size: 48px; font-weight: bold; margin: 20px;">$0</div>
-        <img src="https://img.icons8.com/color/160/happy-chef.png" alt="Happy Chef">
-        <p>幹得好！你是一個優秀的數學大廚！</p>
-        <div id="rain-container"></div>
+        <h1 style="color: var(--secondary); font-size: 50px;">💰 薪資結算 💰</h1>
+        <div style="font-size: 60px; font-weight: bold; margin: 20px;" id="final-amount">$0</div>
+        <div style="font-size: 100px;">🤩</div>
+        <p style="font-size: 24px; font-weight: bold;">太棒了！你真是天才數學小廚師！</p>
+        <button onclick="location.reload()">重新挑戰</button>
     </div>
 
     <script>
-        let currentPage = 0;
-        let totalMoney = 0;
-        let timeLeft = 420; // 7 分鐘 = 420 秒 [cite: 7]
-        let timerInterval;
+        let currentIdx = 0;
+        let totalEarnings = 0;
+        let secondsLeft = 420; // 7 分鐘 
+        let timerStarted = false;
 
-        // 關卡資料 [cite: 16-43]
-        const levels = [
-            null, // Page 0
-            null, // Page 1 (Hardcoded)
-            { id: 2, title: "正式廚師", order: "上層麵包、下層麵包、培根", items: ["bun-top", "bun-bottom", "bacon"], answer: "3!", price: 100 },
-            { id: 3, title: "正式廚師", order: "上層麵包、下層麵包、生菜、起司、番茄、牛肉", items: ["bun-top", "bun-bottom", "lettuce", "cheese", "tomato", "patty"], answer: "6!", price: 200 },
-            { id: 4, title: "正式廚師", order: "下層麵包、生菜、起司、番茄 (生菜必須在最下面)", items: ["bun-bottom", "lettuce", "cheese", "tomato"], answer: "3!", price: 150 },
-            { id: 5, title: "主廚臨檢", order: "上層麵包、下層麵包、培根、起司、牛肉 (上層最上，下層最下)", items: ["bun-top", "bun-bottom", "bacon", "cheese", "patty"], answer: "3!", price: 250 },
-            { id: 6, title: "正式廚師", order: "起司、番茄、牛肉 (不要麵包)", items: ["cheese", "tomato", "patty"], answer: "3!", price: 120 },
-            { id: 7, title: "正式廚師", order: "生菜、番茄、培根、上麵包、下麵包 (培根最上，上麵包最下)", items: ["lettuce", "tomato", "bacon", "bun-top", "bun-bottom"], answer: "3!", price: 300 },
-            { id: 8, title: "終極挑戰", order: "選六種食材自由發揮！", items: ["bun-top", "bun-bottom", "patty", "lettuce", "cheese", "tomato", "bacon"], isFinal: true, price: 500 }
-        ];
+        // 關卡邏輯資料 [cite: 16-43]
+        const levelData = {
+            2: { desc: "要有上層麵包、下層麵包、培根", items: ["bun-top", "bun-bottom", "bacon"], answer: "3!", price: 100 },
+            3: { desc: "要有上層麵包、下層麵包、生菜、起司、番茄、牛肉", items: ["bun-top", "bun-bottom", "lettuce", "cheese", "tomato", "patty"], answer: "6!", price: 200 },
+            4: { desc: "要有下層麵包、生菜、起司、番茄，生菜一定要在最下面", items: ["bun-bottom", "lettuce", "cheese", "tomato"], answer: "3!", price: 150 },
+            5: { desc: "上層麵包一定要在最上面，下層麵包一定要在最下面", items: ["bun-top", "bun-bottom", "bacon", "cheese", "patty"], answer: "3!", price: 250 },
+            6: { desc: "要有起司、番茄、牛肉，不要麵包", items: ["cheese", "tomato", "patty"], answer: "3!", price: 120 },
+            7: { desc: "培根一定要在最上面，上層麵包一定要在最下面", items: ["lettuce", "tomato", "bacon", "bun-top", "bun-bottom"], answer: "3!", price: 300 },
+            8: { desc: "預算問題只能選六種食材，讓廚師自由發揮！", items: ["bun-top", "bun-bottom", "patty", "lettuce", "cheese", "tomato", "bacon"], isMulti: true, price: 500 }
+        };
 
-        function nextPage(pageIdx) {
+        // 頁面切換 [cite: 12]
+        function goToPage(num) {
             document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-            if (pageIdx <= 8) {
-                const pageId = pageIdx === 1 ? 'page1' : 'game-page';
-                document.getElementById(pageId).classList.add('active');
-                if (pageIdx >= 2) loadLevel(pageIdx);
-            } else {
-                showFinalPage();
+            if (num === 1) {
+                document.getElementById('page1').classList.add('active');
+            } else if (num >= 2 && num <= 8) {
+                document.getElementById('game-page').classList.add('active');
+                setupLevel(num);
+            } else if (num === 9) {
+                showFinal();
             }
-            currentPage = pageIdx;
+            currentIdx = num;
         }
 
-        function startOfficialGame() {
-            document.getElementById('timer-display').style.display = 'block';
-            startTimer();
-            nextPage(2);
+        // 計時器啟動 [cite: 7-8]
+        function startTimerAndGame() {
+            if (!timerStarted) {
+                timerStarted = true;
+                document.getElementById('timer-display').style.display = 'block';
+                const timer = setInterval(() => {
+                    secondsLeft--;
+                    let m = Math.floor(secondsLeft / 60);
+                    let s = secondsLeft % 60;
+                    document.getElementById('time-left').innerText = `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+                    if (secondsLeft <= 0) {
+                        clearInterval(timer);
+                        goToPage(9);
+                    }
+                }, 1000);
+            }
+            goToPage(2);
         }
 
-        function startTimer() {
-            timerInterval = setInterval(() => {
-                timeLeft--;
-                let mins = Math.floor(timeLeft / 60);
-                let secs = timeLeft % 60;
-                document.getElementById('time-left').innerText = `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
-                if (timeLeft <= 0) {
-                    clearInterval(timerInterval);
-                    showFinalPage(); // 時間到跳轉 [cite: 8]
-                }
-            }, 1000);
-        }
-
-        function loadLevel(idx) {
-            const lv = levels[idx];
-            document.getElementById('level-title').innerText = lv.title;
-            document.getElementById('order-desc').innerText = lv.order;
-            document.getElementById('main-plate').innerHTML = "";
-            document.getElementById('math-question').style.display = "none";
-            document.getElementById('serve-btn').style.display = "block";
-            
-            const ingredientArea = document.getElementById('game-ingredients');
-            ingredientArea.innerHTML = "";
-            lv.items.forEach((item, i) => {
-                const div = document.createElement('div');
-                div.className = `ingredient ${item}`;
-                div.draggable = true;
-                div.id = `item-${idx}-${i}`;
-                div.innerText = getItemName(item);
-                div.ondragstart = drag;
-                ingredientArea.appendChild(div);
-            });
-        }
-
-        function getItemName(type) {
-            const names = { "bun-top": "上層麵包", "bun-bottom": "下層麵包", "patty": "牛肉", "lettuce": "生菜", "cheese": "起司", "tomato": "番茄", "bacon": "培根" };
-            return names[type] || type;
-        }
-
-        // 拖放邏輯 [cite: 14]
+        // 拖放功能 
         function allowDrop(ev) { ev.preventDefault(); }
         function drag(ev) { ev.dataTransfer.setData("text", ev.target.id); }
         function drop(ev) {
             ev.preventDefault();
             const data = ev.dataTransfer.getData("text");
-            const draggedEl = document.getElementById(data);
-            ev.currentTarget.appendChild(draggedEl);
-            if (currentPage === 1) document.getElementById('next-btn-1').style.display = "block";
+            ev.currentTarget.appendChild(document.getElementById(data));
+            if (currentIdx === 1 && document.getElementById('plate1').children.length >= 4) {
+                document.getElementById('next-btn-1').style.display = "inline-block";
+            }
         }
 
-        function checkOrder() {
+        function setupLevel(lv) {
+            const data = levelData[lv];
+            document.getElementById('level-title').innerText = lv === 5 ? "⚠️ 主廚臨檢" : "正式廚師";
+            document.getElementById('order-desc').innerText = data.desc;
+            document.getElementById('main-plate').innerHTML = "";
+            document.getElementById('math-question').style.display = "none";
+            document.getElementById('serve-btn').style.display = "inline-block";
+            
+            const source = document.getElementById('game-source');
+            source.innerHTML = "";
+            data.items.forEach((type, i) => {
+                const div = document.createElement('div');
+                div.className = `ingredient ${type}`;
+                div.draggable = true;
+                div.id = `item-${lv}-${i}`;
+                div.innerText = getLabel(type);
+                div.ondragstart = drag;
+                source.appendChild(div);
+            });
+        }
+
+        function getLabel(t) {
+            return { "bun-top": "上層麵包", "bun-bottom": "下層麵包", "patty": "牛肉", "lettuce": "生菜", "cheese": "起司", "tomato": "番茄", "bacon": "培根" }[t];
+        }
+
+        function showQuestion() {
             document.getElementById('serve-btn').style.display = "none";
             document.getElementById('math-question').style.display = "block";
-            const lv = levels[currentPage];
-            const optionsArea = document.getElementById('options');
-            optionsArea.innerHTML = "";
-
-            if (lv.isFinal) { // 第八頁特殊設計 [cite: 42, 43]
+            const qText = document.getElementById('question-text');
+            const opts = document.getElementById('options');
+            opts.innerHTML = "";
+            
+            if (currentIdx === 8) {
+                qText.innerText = "客人提問：選法會有幾種？(輸入六個數字相乘)";
                 for(let i=0; i<6; i++) {
-                    let select = document.createElement('input');
-                    select.type = "number"; select.min=1; select.max=7; select.value=1;
-                    select.style.width="40px";
-                    optionsArea.appendChild(select);
+                    const input = document.createElement('input');
+                    input.type="number"; input.value="1"; input.style.width="40px";
+                    opts.appendChild(input);
                 }
+                const sub = document.createElement('button');
+                sub.innerText = "提交答案"; sub.onclick = () => finishLevel(true);
+                opts.appendChild(sub);
             } else {
-                ["2!", "3!", "4!", "5!", "6!", "7!"].forEach(opt => {
-                    const btn = document.createElement('button');
-                    btn.innerText = opt;
-                    btn.style.margin = "5px";
-                    btn.onclick = () => submitAnswer(opt === lv.answer);
-                    optionsArea.appendChild(btn);
+                qText.innerText = "客人提問：該訂單食材排列會有幾的階乘？";
+                ["2!", "3!", "4!", "5!", "6!", "7!"].forEach(ans => {
+                    const b = document.createElement('button');
+                    b.innerText = ans;
+                    b.style.fontSize = "16px";
+                    b.onclick = () => finishLevel(ans === levelData[currentIdx].answer);
+                    opts.appendChild(b);
                 });
             }
-            if(lv.isFinal) {
-                const submit = document.createElement('button');
-                submit.innerText = "提交答案";
-                submit.onclick = () => submitAnswer(true);
-                optionsArea.appendChild(submit);
-            }
         }
 
-        function submitAnswer(isCorrect) {
-            const lv = levels[currentPage];
-            if (isCorrect) {
-                alert("太棒了！獲得小費！");
-                totalMoney += (lv.price + 50); [cite: 5]
+        function finishLevel(correct) {
+            const reward = levelData[currentIdx].price;
+            if (correct) {
+                alert("✅ 正確！獲得訂單金額與小費！");
+                totalEarnings += (reward + 50);
             } else {
-                alert("喔不，客人失望地離開了。正確答案是 " + lv.answer);
-                totalMoney += lv.price;
+                alert(`❌ 答錯了，正確答案是 ${levelData[currentIdx].answer}。客人失落離開。`);
+                totalEarnings += reward;
             }
-            document.getElementById('total-money').innerText = totalMoney;
-            
-            if (currentPage < 8) nextPage(currentPage + 1);
-            else showFinalPage();
+            document.getElementById('total-money').innerText = totalEarnings;
+            if (currentIdx < 8) goToPage(currentIdx + 1);
+            else goToPage(9);
         }
 
-        function showFinalPage() {
-            clearInterval(timerInterval);
+        function showFinal() {
             document.getElementById('timer-display').style.display = 'none';
-            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
             document.getElementById('page9').classList.add('active');
-            document.getElementById('final-amount').innerText = `$ ${totalMoney}`; [cite: 8]
-            createMoneyRain();
-        }
-
-        function createMoneyRain() {
-            const container = document.getElementById('rain-container');
-            for(let i=0; i<50; i++) {
-                const m = document.createElement('div');
-                m.className = 'money-rain';
-                m.innerText = '💰';
-                m.style.left = Math.random() * 100 + 'vw';
-                m.style.animationDelay = Math.random() * 2 + 's';
-                container.appendChild(m);
+            document.getElementById('final-amount').innerText = `$ ${totalEarnings}`;
+            for(let i=0; i<30; i++) {
+                setTimeout(() => {
+                    const m = document.createElement('div');
+                    m.className = 'money-rain';
+                    m.innerText = '💰';
+                    m.style.left = Math.random() * 100 + 'vw';
+                    document.body.appendChild(m);
+                }, i * 100);
             }
         }
     </script>
